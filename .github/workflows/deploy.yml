@@ -1,0 +1,154 @@
+# ======================================================================
+# 工作流名称（会显示在 GitHub 的 Actions 标签页）
+# ======================================================================
+name: Deploy Next.js site to Pages
+
+# ======================================================================
+# 触发方式（on）：什么时候运行这个工作流
+#   - push: 当代码推送到 main 分支时触发
+#           → 也就是说，只要你把代码推/合并到 main，就会自动构建并部署
+#   - workflow_dispatch: 允许你在 Actions 页面手动点击运行（多一个保险）
+# ======================================================================
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+# ======================================================================
+# 权限（permissions）：给这个工作流授予的最小权限
+#   - contents: read     可以读取仓库代码（构建需要）
+#   - pages: write       可以往 GitHub Pages 写入/发布内容（部署需要）
+#   - id-token: write    生成短期身份令牌，用于 Pages 的安全认证
+# 原则：只给够用的最小权限，降低安全风险
+# ======================================================================
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# ======================================================================
+# 并发控制（concurrency）：
+#   - 同一个仓库在任意时刻只允许一个该工作流运行
+#   - cancel-in-progress: false 表示不取消正在运行的那次，等它跑完
+#     这样能避免「多次 push 时部署互相打架」
+# ======================================================================
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+# ======================================================================
+# 任务（jobs）：整个工作流由多个 job 组成，job 之间按 needs 依赖执行
+#   这里分两个阶段：
+#     1. build  →  构建静态文件
+#     2. deploy →  等 build 成功后，把产物发布出去
+# ======================================================================
+jobs:
+  # ------------------------------------------------------------------
+  # 【阶段一】build：CI 部分 —— 检出代码 → 装依赖 → 生成静态站点
+  # ------------------------------------------------------------------
+  build:
+    # 运行环境：使用 GitHub 提供的最新 Ubuntu 虚拟机
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 检出仓库代码到这台虚拟机上
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. 自动识别你用的是哪个包管理器（pnpm / yarn / npm）
+      #    把结果写入 GITHUB_OUTPUT，后续步骤通过 steps.xxx.outputs.xxx 读取
+      - name: Detect package manager
+        id: detect-package-manager
+        run: |
+          # 有 pnpm-lock.yaml 就用 pnpm（本项目走这里）
+          if [ -f "${{ github.workspace }}/pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> "$GITHUB_OUTPUT"
+            echo "command=install --frozen-lockfile" >> "$GITHUB_OUTPUT"
+            echo "runner=pnpm" >> "$GITHUB_OUTPUT"
+            exit 0
+          # 有 yarn.lock 就用 yarn
+          elif [ -f "${{ github.workspace }}/yarn.lock" ]; then
+            echo "manager=yarn" >> "$GITHUB_OUTPUT"
+            echo "command=install" >> "$GITHUB_OUTPUT"
+            echo "runner=yarn" >> "$GITHUB_OUTPUT"
+            exit 0
+          # 有 package.json 就用 npm
+          elif [ -f "${{ github.workspace }}/package.json" ]; then
+            echo "manager=npm" >> "$GITHUB_OUTPUT"
+            echo "command=ci" >> "$GITHUB_OUTPUT"   # 等价于 npm ci（按锁文件精确安装）
+            echo "runner=npx --no-install" >> "$GITHUB_OUTPUT"
+            exit 0
+          else
+            # 都没有就报错终止
+            echo "Unable to determine package manager"
+            exit 1
+          fi
+
+      # 3. 安装 Node.js 环境，并开启依赖缓存（根据包管理器缓存锁文件）
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"  # 指定 Node 版本
+          cache: ${{ steps.detect-package-manager.outputs.manager }}
+
+      # 4. 配置 GitHub Pages 环境
+      #    static_site_generator: next 会告诉 Pages 这是 Next.js 站点，
+      #    并自动往环境里注入 BASE_PATH 变量（值是仓库路径，如 /DevBlog），
+      #    next.config.mjs 里的 basePath 会读取它，保证资源路径正确
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          static_site_generator: next
+
+      # 5. 恢复上次构建的缓存，加快下次构建（这是构建加速优化）
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+          # 缓存 key：根据操作系统+锁文件+源码变化生成，源文件变了 key 就变，缓存自动失效
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml', '**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-
+
+      # 6. 安装依赖（本项目实际执行 pnpm install --frozen-lockfile）
+      - name: Install dependencies
+        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+
+      # 7. 构建：产出静态文件到 out/ 目录（因为 next.config 开了 output: "export"）
+      - name: Build with Next.js
+        run: ${{ steps.detect-package-manager.outputs.runner }} next build
+
+      # 8. GitHub Pages 默认用 Jekyll 处理，会忽略以下划线"_"开头的目录（如 _next）。
+      #    放一个空的 .nojekyll 文件告诉 Jekyll「跳过我」，确保 JS/CSS 资源正常
+      - name: Add .nojekyll
+        run: touch out/.nojekyll
+
+      # 9. 把构建产物（out/ 目录）打包上传成 artifact，供 deploy 阶段下载发布
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  # ------------------------------------------------------------------
+  # 【阶段二】deploy：CD 部分 —— 把 build 产出的静态文件发布上 GitHub Pages
+  # ------------------------------------------------------------------
+  deploy:
+    # 环境（environment）：部署环境命名，可在仓库 Settings > Environments 里看到
+    environment:
+      name: github-pages
+      # 部署完成后，Actions 页面上展示的站点访问地址
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build  # 关键：必须等 build 成功后才运行（依赖关系）
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4  # 把 artifact 一键发布到 Pages，生成线上站点
+
+# ======================================================================
+# 总结：部署流程
+#   代码 push 到 main
+#     → build（检出/装依赖/构建出 out 静态文件并上传）
+#       → deploy（把静态文件发布到 GitHub Pages）
+#         → 访问 https://register2019.github.io/DevBlog/
+# ======================================================================
