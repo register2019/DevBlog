@@ -52,7 +52,7 @@ jobs:
     steps:
       # 1. 检出仓库代码到这台虚拟机上
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # 2. 自动识别你用的是哪个包管理器（pnpm / yarn / npm）
       #    把结果写入 GITHUB_OUTPUT，后续步骤通过 steps.xxx.outputs.xxx 读取
@@ -90,7 +90,7 @@ jobs:
 
       # 4. 安装 Node.js 环境，并开启依赖缓存（根据包管理器缓存锁文件）
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "22"  # 指定 Node 版本（pnpm 11 要求 Node ≥ 22.13）
           cache: ${{ steps.detect-package-manager.outputs.manager }}
@@ -106,7 +106,7 @@ jobs:
 
       # 6. 恢复上次构建的缓存，加快下次构建（这是构建加速优化）
       - name: Restore cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             .next/cache
@@ -130,7 +130,7 @@ jobs:
 
       # 10. 把构建产物（out/ 目录）打包上传成 artifact，供 deploy 阶段下载发布
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./out
 
