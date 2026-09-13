@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-tech-dark bg-grid text-gray-100 font-mono overflow-x-hidden;
+}
+
+/* 科技风玻璃卡片 */
+@layer components {
+  .glass {
+    @apply backdrop-blur-md bg-tech-card border border-tech-border rounded-xl;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow:
+      0 0 8px #00d2ff,
+      0 0 16px rgba(0, 210, 255, 0.4);
+  }
+  .border-glow-hover {
+    @apply transition-all duration-300 hover:border-tech-glow hover:shadow-[0_0_18px_rgba(0,210,255,0.25)];
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(0, 210, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 210, 255, 0.08) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}
+
+#particleCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
