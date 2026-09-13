@@ -1,6 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Tailwind v4 用 CSS-first 配置：原 tailwind.config.ts 的主题内容迁到 @theme。
+   --color-xxx 会生成 bg-/text-/border- 等颜色工具类(含 /10 /20 透明度叠加) */
+@theme {
+  --color-tech-dark: #080c18;
+  --color-tech-card: rgba(15, 22, 40, 0.65);
+  --color-tech-border: rgba(0, 210, 255, 0.25);
+  --color-tech-glow: #00d2ff;
+  --color-tech-accent: #9c27ff;
+
+  --font-mono: "JetBrains Mono", "Consolas", monospace;
+}
 
 * {
   scroll-behavior: smooth;
@@ -11,27 +21,28 @@ body {
 }
 
 /* 科技风玻璃卡片 */
-@layer components {
-  .glass {
-    @apply backdrop-blur-md bg-tech-card border border-tech-border rounded-xl;
-  }
+@utility glass {
+  @apply backdrop-blur-md bg-tech-card border border-tech-border rounded-xl;
 }
 
-@layer utilities {
-  .text-glow {
-    text-shadow:
-      0 0 8px #00d2ff,
-      0 0 16px rgba(0, 210, 255, 0.4);
-  }
-  .border-glow-hover {
-    @apply transition-all duration-300 hover:border-tech-glow hover:shadow-[0_0_18px_rgba(0,210,255,0.25)];
-  }
-  .bg-grid {
-    background-image:
-      linear-gradient(rgba(0, 210, 255, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 210, 255, 0.08) 1px, transparent 1px);
-    background-size: 32px 32px;
-  }
+/* 发光文字 */
+@utility text-glow {
+  text-shadow:
+    0 0 8px #00d2ff,
+    0 0 16px rgba(0, 210, 255, 0.4);
+}
+
+/* 悬浮发光边框 */
+@utility border-glow-hover {
+  @apply transition-all duration-300 hover:border-tech-glow hover:shadow-[0_0_18px_rgba(0,210,255,0.25)];
+}
+
+/* 网格点阵背景 */
+@utility bg-grid {
+  background-image:
+    linear-gradient(rgba(0, 210, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 210, 255, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 #particleCanvas {
