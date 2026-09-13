@@ -83,14 +83,19 @@ jobs:
             exit 1
           fi
 
-      # 3. 安装 Node.js 环境，并开启依赖缓存（根据包管理器缓存锁文件）
+      # 3. 用官方 action 安装 pnpm（本项目用 pnpm，不装则 runner 上找不到 pnpm 命令）
+      #    版本自动读取 package.json 里的 packageManager 字段（pnpm@11.24.0）
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      # 4. 安装 Node.js 环境，并开启依赖缓存（根据包管理器缓存锁文件）
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"  # 指定 Node 版本
           cache: ${{ steps.detect-package-manager.outputs.manager }}
 
-      # 4. 配置 GitHub Pages 环境
+      # 5. 配置 GitHub Pages 环境
       #    static_site_generator: next 会告诉 Pages 这是 Next.js 站点，
       #    并自动往环境里注入 BASE_PATH 变量（值是仓库路径，如 /DevBlog），
       #    next.config.mjs 里的 basePath 会读取它，保证资源路径正确
@@ -99,7 +104,7 @@ jobs:
         with:
           static_site_generator: next
 
-      # 5. 恢复上次构建的缓存，加快下次构建（这是构建加速优化）
+      # 6. 恢复上次构建的缓存，加快下次构建（这是构建加速优化）
       - name: Restore cache
         uses: actions/cache@v4
         with:
@@ -110,20 +115,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-
 
-      # 6. 安装依赖（本项目实际执行 pnpm install --frozen-lockfile）
+      # 7. 安装依赖（本项目实际执行 pnpm install --frozen-lockfile）
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
 
-      # 7. 构建：产出静态文件到 out/ 目录（因为 next.config 开了 output: "export"）
+      # 8. 构建：产出静态文件到 out/ 目录（因为 next.config 开了 output: "export"）
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
 
-      # 8. GitHub Pages 默认用 Jekyll 处理，会忽略以下划线"_"开头的目录（如 _next）。
+      # 9. GitHub Pages 默认用 Jekyll 处理，会忽略以下划线"_"开头的目录（如 _next）。
       #    放一个空的 .nojekyll 文件告诉 Jekyll「跳过我」，确保 JS/CSS 资源正常
       - name: Add .nojekyll
         run: touch out/.nojekyll
 
-      # 9. 把构建产物（out/ 目录）打包上传成 artifact，供 deploy 阶段下载发布
+      # 10. 把构建产物（out/ 目录）打包上传成 artifact，供 deploy 阶段下载发布
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
