@@ -100,7 +100,7 @@ jobs:
       #    并自动往环境里注入 BASE_PATH 变量（值是仓库路径，如 /DevBlog），
       #    next.config.mjs 里的 basePath 会读取它，保证资源路径正确
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
         with:
           static_site_generator: next
 
@@ -148,7 +148,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4  # 把 artifact 一键发布到 Pages，生成线上站点
+        uses: actions/deploy-pages@v5  # 把 artifact 一键发布到 Pages，生成线上站点
 
 # ======================================================================
 # 总结：部署流程
