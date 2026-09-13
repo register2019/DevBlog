@@ -92,7 +92,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"  # 指定 Node 版本
+          node-version: "22"  # 指定 Node 版本（pnpm 11 要求 Node ≥ 22.13）
           cache: ${{ steps.detect-package-manager.outputs.manager }}
 
       # 5. 配置 GitHub Pages 环境
