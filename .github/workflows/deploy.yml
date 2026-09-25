@@ -96,16 +96,7 @@ jobs:
           node-version: "22" # 指定 Node 版本（pnpm 11 要求 Node ≥ 22.13）
           cache: ${{ steps.detect-package-manager.outputs.manager }}
 
-      # 5. 配置 GitHub Pages 环境
-      #    static_site_generator: next 会告诉 Pages 这是 Next.js 站点，
-      #    并自动往环境里注入 BASE_PATH 变量（值是仓库路径，如 /DevBlog），
-      #    next.config.mjs 里的 basePath 会读取它，保证资源路径正确
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
-        with:
-          static_site_generator: next
-
-      # 6. 恢复上次构建的缓存，加快下次构建（这是构建加速优化）
+      # 5. 恢复上次构建的缓存，加快下次构建（这是构建加速优化）
       - name: Restore cache
         uses: actions/cache@v5
         with:
@@ -116,17 +107,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-
 
-      # 7. 安装依赖（本项目实际执行 pnpm install --frozen-lockfile）
+      # 6. 安装依赖（本项目实际执行 pnpm install --frozen-lockfile）
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
 
-      # 8. 静态质量检查（团队标准：提交代码必须过 ESLint + Prettier 两关）
+      # 7. 静态质量检查（团队标准：提交代码必须过 ESLint + Prettier 两关）
       #    任何 ESLint 错误或格式不符都会使 workflow 失败，从而阻止脏代码上线。
       #    即使本地有 husky 钩子，CI 这道闸仍是最终防线（防未配钩子/绕过提交）
+      #    ⚠️ 顺序要求：必须放在 Setup Pages 之前。configure-pages 会原地改写
+      #       next.config.mjs（注入 basePath/images.unoptimized），若在其后跑
+      #       prettier --check，会把改写后的文件误判为格式错误导致失败。
       - name: Lint & Format
         run: |
           ${{ steps.detect-package-manager.outputs.runner }} lint
           ${{ steps.detect-package-manager.outputs.runner }} format:check
+
+      # 8. 配置 GitHub Pages 环境（放在构建前、质量检查后）
+      #    static_site_generator: next 会让 configure-pages 自动改写 next.config.mjs，
+      #    注入 output/basePath/images.unoptimized，保证子路径部署下资源路径正确
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+        with:
+          static_site_generator: next
 
       # 9. 构建：产出静态文件到 out/ 目录（因为 next.config 开了 output: "export"）
       - name: Build with Next.js
