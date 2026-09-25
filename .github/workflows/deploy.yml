@@ -92,7 +92,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          node-version: "22"  # 指定 Node 版本（pnpm 11 要求 Node ≥ 22.13）
+          node-version: "22" # 指定 Node 版本（pnpm 11 要求 Node ≥ 22.13）
           cache: ${{ steps.detect-package-manager.outputs.manager }}
 
       # 5. 配置 GitHub Pages 环境
@@ -119,16 +119,24 @@ jobs:
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
 
-      # 8. 构建：产出静态文件到 out/ 目录（因为 next.config 开了 output: "export"）
+      # 8. 静态质量检查（团队标准：提交代码必须过 ESLint + Prettier 两关）
+      #    任何 ESLint 错误或格式不符都会使 workflow 失败，从而阻止脏代码上线。
+      #    即使本地有 husky 钩子，CI 这道闸仍是最终防线（防未配钩子/绕过提交）
+      - name: Lint & Format
+        run: |
+          ${{ steps.detect-package-manager.outputs.runner }} lint
+          ${{ steps.detect-package-manager.outputs.runner }} format:check
+
+      # 9. 构建：产出静态文件到 out/ 目录（因为 next.config 开了 output: "export"）
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
 
-      # 9. GitHub Pages 默认用 Jekyll 处理，会忽略以下划线"_"开头的目录（如 _next）。
-      #    放一个空的 .nojekyll 文件告诉 Jekyll「跳过我」，确保 JS/CSS 资源正常
+      # 10. GitHub Pages 默认用 Jekyll 处理，会忽略以下划线"_"开头的目录（如 _next）。
+      #     放一个空的 .nojekyll 文件告诉 Jekyll「跳过我」，确保 JS/CSS 资源正常
       - name: Add .nojekyll
         run: touch out/.nojekyll
 
-      # 10. 把构建产物（out/ 目录）打包上传成 artifact，供 deploy 阶段下载发布
+      # 11. 把构建产物（out/ 目录）打包上传成 artifact，供 deploy 阶段下载发布
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
@@ -144,16 +152,18 @@ jobs:
       # 部署完成后，Actions 页面上展示的站点访问地址
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build  # 关键：必须等 build 成功后才运行（依赖关系）
+    needs: build # 关键：必须等 build 成功后才运行（依赖关系）
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5  # 把 artifact 一键发布到 Pages，生成线上站点
+        uses: actions/deploy-pages@v5 # 把 artifact 一键发布到 Pages，生成线上站点
+
 
 # ======================================================================
-# 总结：部署流程
+# 总结：部署流程（团队级质量链）
 #   代码 push 到 main
-#     → build（检出/装依赖/构建出 out 静态文件并上传）
+#     → build（检出/装依赖 → ①Lint(ESLint) ②Format(Prettier) 质量检查 → 构建 out 并上传）
 #       → deploy（把静态文件发布到 GitHub Pages）
 #         → 访问 https://register2019.github.io/DevBlog/
+# 关键：静态检查在构建之前，任一不符合规范即中止，脏代码无法上线
 # ======================================================================

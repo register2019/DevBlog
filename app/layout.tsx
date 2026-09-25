@@ -5,15 +5,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "DevBlog | 前端开发者博客",
-  description:
-    "专注前端可视化、工程化、WebGL/Canvas 开发，记录技术踩坑与思考。",
+  description: "专注前端可视化、工程化、WebGL/Canvas 开发，记录技术踩坑与思考。",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
       <head>

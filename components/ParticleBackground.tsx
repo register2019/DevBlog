@@ -22,8 +22,8 @@ export default function ParticleBackground() {
     let w = 0;
     let h = 0;
     let raf = 0;
-    let particles: P[] = [];
-    let particleCount = 80;
+    const particles: P[] = [];
+    const particleCount = 80;
 
     const resizeCanvas = () => {
       w = canvas.width = window.innerWidth;

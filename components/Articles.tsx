@@ -40,8 +40,8 @@ const articles: Article[] = [
 export default function Articles() {
   return (
     <section id="articles" className="py-20 px-6 max-w-6xl mx-auto">
-      <h2 className="text-3xl font-bold mb-10 text-center">
-        <span className="text-tech-glow">//</span> 技术文章
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-10 text-center">
+        <span className="text-tech-glow">{"//"}</span> 技术文章
       </h2>
       <div className="grid md:grid-cols-2 gap-6">
         {articles.map((article) => (
@@ -54,12 +54,8 @@ export default function Articles() {
             </h3>
             <p className="text-gray-400 text-sm">{article.description}</p>
             <div className="mt-4 flex gap-2">
-              <span className="px-2 py-1 bg-tech-glow/10 rounded text-xs">
-                {article.tags[0]}
-              </span>
-              <span className="px-2 py-1 bg-tech-accent/10 rounded text-xs">
-                {article.tags[1]}
-              </span>
+              <span className="px-2 py-1 bg-tech-glow/10 rounded text-xs">{article.tags[0]}</span>
+              <span className="px-2 py-1 bg-tech-accent/10 rounded text-xs">{article.tags[1]}</span>
             </div>
           </article>
         ))}

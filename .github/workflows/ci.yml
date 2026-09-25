@@ -1,0 +1,76 @@
+# ======================================================================
+# 名称：CI —— 团队代码质量检查（不部署）
+#   - 作用：在任何 push（main 及任意分支）和 pull_request 时，
+#           对代码做全量质量检查，作为本地 husky 之外的「远端最终防线」
+#   - 覆盖检查：Lint(ESLint) / Format(Prettier) / Typecheck(tsc) / commitlint
+#   - 注意：本流程只做检查、不做构建部署；部署仍由 deploy.yml 负责
+# ======================================================================
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # ------------------------------------------------------------------
+  # 【质量检查】跨 Node 版本跑 lint / format / typecheck
+  #   矩阵 matrix.node 并行跑多个 Node 版本，提前发现环境差异
+  #   说明：矩阵不含 Node 20 —— pnpm 11（本项目 packageManager）要求 Node ≥ 22.13，
+  #         Node 20 下 pnpm install 会因缺 node:sqlite 失败，因此只覆盖 22/24
+  # ------------------------------------------------------------------
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 以下三步为团队质量关卡，逐个执行，任一失败即中断
+      - name: Lint (ESLint)
+        run: pnpm lint
+
+      - name: Format (Prettier)
+        run: pnpm format:check
+
+      - name: Typecheck (tsc)
+        run: pnpm typecheck
+
+  # ------------------------------------------------------------------
+  # 【提交信息规范】commitlint —— 校验 PR 标题符合 Conventional Commits
+  #   （例：feat: xxx / fix: xxx / chore: xxx）
+  #   只在 PR 场景触发，防止不规范命名合并进 main
+  # ------------------------------------------------------------------
+  commitlint:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate PR title with commitlint
+        run: echo "${{ github.event.pull_request.title }}" | pnpm exec commitlint
