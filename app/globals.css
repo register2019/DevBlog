@@ -58,6 +58,9 @@ body {
 /* 文章详情页正文：把 typography 插件的配色改成站点科技风。
    选择器带 article 标签，特异性高于插件自身的 .prose，保证覆盖生效 */
 article.post-content {
+  /* 正文自适应字号：视口越宽字越大，高分辨率屏幕上无需手动缩放。
+     插件内部间距与标题都用 em，会跟随字号同步放大 */
+  font-size: clamp(1.0625rem, 0.85rem + 0.6vw, 1.5rem);
   --tw-prose-body: #d1d5db;
   --tw-prose-headings: #ffffff;
   --tw-prose-lead: #9ca3af;
@@ -74,6 +77,11 @@ article.post-content {
   --tw-prose-pre-bg: rgba(6, 12, 24, 0.85);
   --tw-prose-th-borders: rgba(0, 210, 255, 0.25);
   --tw-prose-td-borders: rgba(0, 210, 255, 0.15);
+}
+
+/* 正文代码块：长行改为块内横向滚动，避免字号加大、正文加宽后撑破卡片 */
+article.post-content pre {
+  overflow-x: auto;
 }
 
 /* 尊重系统「减少动态效果」偏好：闪烁、弹跳等装饰动效收敛为静态，

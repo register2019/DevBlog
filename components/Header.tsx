@@ -15,7 +15,7 @@ export default function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="glass fixed top-2 md:top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-5xl px-4 md:px-6 py-3">
+    <header className="glass fixed top-2 md:top-4 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-4xl xl:max-w-5xl 2xl:max-w-6xl px-4 md:px-6 py-3">
       <nav className="flex justify-between items-center">
         <Link href="/" className="text-xl font-bold text-tech-glow text-glow">
           DevBlog<span className="text-tech-accent">.</span>

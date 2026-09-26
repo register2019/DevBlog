@@ -31,7 +31,7 @@ export default async function PostPage({ params }: PageProps) {
   const html = await renderMarkdown(post.content);
 
   return (
-    <div className="py-16 px-6 max-w-3xl mx-auto">
+    <div className="py-16 px-6 lg:px-0 max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto">
       <Link href="/posts" className="text-sm text-gray-400 hover:text-tech-glow transition-colors">
         <i className="fa fa-arrow-left mr-2" aria-hidden="true" />
         返回文章列表
@@ -41,7 +41,9 @@ export default async function PostPage({ params }: PageProps) {
         <div className="text-xs text-tech-glow mb-3">
           {post.date} · {post.category}
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold leading-snug">{post.title}</h1>
+        <h1 className="text-2xl sm:text-3xl xl:text-4xl 2xl:text-5xl font-bold leading-snug">
+          {post.title}
+        </h1>
         {post.tags.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             {post.tags.map((tag) => (
