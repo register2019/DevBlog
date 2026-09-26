@@ -3,3 +3,5 @@ node_modules
 out
 .vercel
 pnpm-lock.yaml
+# 手写的技术博客正文，不强制走 Prettier 重排
+docs

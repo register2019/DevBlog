@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* Tailwind v4 用 CSS-first 配置：原 tailwind.config.ts 的主题内容迁到 @theme。
    --color-xxx 会生成 bg-/text-/border- 等颜色工具类(含 /10 /20 透明度叠加) */
@@ -52,4 +53,25 @@ body {
   width: 100vw;
   height: 100vh;
   z-index: -1;
+}
+
+/* 文章详情页正文：把 typography 插件的配色改成站点科技风。
+   选择器带 article 标签，特异性高于插件自身的 .prose，保证覆盖生效 */
+article.post-content {
+  --tw-prose-body: #d1d5db;
+  --tw-prose-headings: #ffffff;
+  --tw-prose-lead: #9ca3af;
+  --tw-prose-links: #00d2ff;
+  --tw-prose-bold: #ffffff;
+  --tw-prose-counters: #00d2ff;
+  --tw-prose-bullets: rgba(0, 210, 255, 0.45);
+  --tw-prose-hr: rgba(0, 210, 255, 0.2);
+  --tw-prose-quotes: #e5e7eb;
+  --tw-prose-quote-borders: rgba(0, 210, 255, 0.35);
+  --tw-prose-captions: #9ca3af;
+  --tw-prose-code: #00d2ff;
+  --tw-prose-pre-code: #e5e7eb;
+  --tw-prose-pre-bg: rgba(6, 12, 24, 0.85);
+  --tw-prose-th-borders: rgba(0, 210, 255, 0.25);
+  --tw-prose-td-borders: rgba(0, 210, 255, 0.15);
 }
