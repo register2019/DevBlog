@@ -12,7 +12,7 @@ export default function Articles() {
       </h2>
 
       {posts.length === 0 ? (
-        <p className="text-center text-gray-400 text-sm">
+        <p className="text-center text-tech-muted text-sm">
           还没有文章，把 Markdown 文件放进 docs/ 目录即可。
         </p>
       ) : (

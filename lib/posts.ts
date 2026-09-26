@@ -168,9 +168,14 @@ export async function renderMarkdown(markdown: string): Promise<string> {
     .use(remarkGfm)
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
-    // 构建期用 Shiki 给代码块上色；keepBackground 关掉主题自带底色，
-    // 保留玻璃卡片的半透明背景，只取 token 配色。必须排在 rehype-raw 之后
-    .use(rehypePrettyCode, { theme: "tokyo-night", keepBackground: false })
+    // 构建期用 Shiki 给代码块上色；给亮/暗各配一套主题，两套 token 颜色都写进
+    // 内联样式，切换主题时由 CSS 挑一套用，无需重新高亮。
+    // keepBackground 关掉主题自带底色，保留玻璃卡片的半透明背景。
+    // 必须排在 rehype-raw 之后
+    .use(rehypePrettyCode, {
+      theme: { light: "github-light", dark: "tokyo-night" },
+      keepBackground: false,
+    })
     .use(rehypeStringify)
     .process(markdown);
 

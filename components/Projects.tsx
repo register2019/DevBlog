@@ -32,7 +32,7 @@ export default function Projects() {
         {projects.map((project) => (
           <div key={project.title} className="glass p-5 border-glow-hover">
             <h3 className="text-lg font-semibold mb-2">{project.title}</h3>
-            <p className="text-gray-400 text-sm mb-3">{project.description}</p>
+            <p className="text-tech-muted text-sm mb-3">{project.description}</p>
             <div className="text-xs text-tech-glow">{project.tech}</div>
           </div>
         ))}

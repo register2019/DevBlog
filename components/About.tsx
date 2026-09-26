@@ -7,7 +7,7 @@ export default function About() {
         <span className="text-tech-glow">{"//"}</span> 关于我
       </h2>
       <div className="glass p-5 md:p-8 border-glow-hover">
-        <p className="text-gray-300 leading-relaxed">
+        <p className="text-tech-soft leading-relaxed">
           前端开发工程师，专注Web可视化、Canvas/GIS、前端工程化。热爱钻研图形渲染、性能优化，平时会在这里记录技术学习笔记、踩坑经验。
           <br />
           <br />

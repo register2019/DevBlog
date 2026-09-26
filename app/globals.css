@@ -10,7 +10,50 @@
   --color-tech-glow: #00d2ff;
   --color-tech-accent: #9c27ff;
 
+  /* 语义文字色阶梯：亮暗主题各一套值，组件里不再写死 gray-xxx */
+  --color-tech-text: #e5e7eb;
+  --color-tech-soft: #d1d5db;
+  --color-tech-muted: #9ca3af;
+  --color-tech-dim: #6b7280;
+  --color-tech-bright: #f9fafb;
+
   --font-mono: "JetBrains Mono", "Consolas", monospace;
+}
+
+/* 放不进 @theme 的运行时变量：给自定义工具类和类名复用 */
+:root {
+  color-scheme: dark;
+  --tech-grid-line: rgba(0, 210, 255, 0.08);
+  --tech-glow-shadow: 0 0 8px #00d2ff, 0 0 16px rgba(0, 210, 255, 0.4);
+  --tech-glow-ring: rgba(0, 210, 255, 0.25);
+  --tech-glow-strong: rgba(0, 210, 255, 0.6);
+  --code-copy-color: #9ca3af;
+}
+
+/* 亮色主题：冷白科技风。
+   @theme 生成的是运行时 CSS 变量，覆盖之后所有 bg-tech-* / text-tech-* /
+   border-tech-* 工具类自动跟随，组件无需改动 */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-tech-dark: #f6f9fc;
+  --color-tech-card: rgba(255, 255, 255, 0.72);
+  --color-tech-border: rgba(2, 132, 199, 0.22);
+  /* 青色调深，保证浅底上的对比度 */
+  --color-tech-glow: #0284c7;
+  --color-tech-accent: #7c3aed;
+
+  --color-tech-text: #1e293b;
+  --color-tech-soft: #334155;
+  --color-tech-muted: #475569;
+  --color-tech-dim: #64748b;
+  --color-tech-bright: #0f172a;
+
+  --tech-grid-line: rgba(2, 132, 199, 0.07);
+  /* 浅底上白雾状发光会糊掉文字，只留一圈很淡的青色光边 */
+  --tech-glow-shadow: 0 0 10px rgba(2, 132, 199, 0.18);
+  --tech-glow-ring: rgba(2, 132, 199, 0.18);
+  --tech-glow-strong: rgba(2, 132, 199, 0.35);
+  --code-copy-color: #475569;
 }
 
 * {
@@ -18,7 +61,7 @@
 }
 
 body {
-  @apply bg-tech-dark bg-grid text-gray-100 font-mono overflow-x-hidden;
+  @apply bg-tech-dark bg-grid text-tech-text font-mono overflow-x-hidden;
 }
 
 /* 科技风玻璃卡片 */
@@ -28,21 +71,19 @@ body {
 
 /* 发光文字 */
 @utility text-glow {
-  text-shadow:
-    0 0 8px #00d2ff,
-    0 0 16px rgba(0, 210, 255, 0.4);
+  text-shadow: var(--tech-glow-shadow);
 }
 
 /* 悬浮发光边框 */
 @utility border-glow-hover {
-  @apply transition-all duration-300 hover:border-tech-glow hover:shadow-[0_0_18px_rgba(0,210,255,0.25)];
+  @apply transition-all duration-300 hover:border-tech-glow hover:shadow-[0_0_18px_var(--tech-glow-ring)];
 }
 
 /* 网格点阵背景 */
 @utility bg-grid {
   background-image:
-    linear-gradient(rgba(0, 210, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 210, 255, 0.08) 1px, transparent 1px);
+    linear-gradient(var(--tech-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tech-grid-line) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
@@ -79,9 +120,125 @@ article.post-content {
   --tw-prose-td-borders: rgba(0, 210, 255, 0.15);
 }
 
+/* 亮色主题下的正文配色：浅底上用深色文字与压深后的青色 */
+:root[data-theme="light"] article.post-content {
+  --tw-prose-body: #334155;
+  --tw-prose-headings: #0f172a;
+  --tw-prose-lead: #475569;
+  --tw-prose-links: #0284c7;
+  --tw-prose-bold: #0f172a;
+  --tw-prose-counters: #0284c7;
+  --tw-prose-bullets: rgba(2, 132, 199, 0.5);
+  --tw-prose-hr: rgba(2, 132, 199, 0.2);
+  --tw-prose-quotes: #334155;
+  --tw-prose-quote-borders: rgba(2, 132, 199, 0.35);
+  --tw-prose-captions: #64748b;
+  --tw-prose-code: #0369a1;
+  --tw-prose-pre-code: #1e293b;
+  --tw-prose-pre-bg: rgba(219, 234, 245, 0.6);
+  --tw-prose-th-borders: rgba(2, 132, 199, 0.3);
+  --tw-prose-td-borders: rgba(2, 132, 199, 0.16);
+}
+
+/* Shiki 双主题：构建期同时产出 --shiki-light / --shiki-dark 两套 token 颜色，
+   这里按当前主题挑一套用，切换时无需重新高亮。
+   keepBackground 已关掉，所以不覆盖背景，玻璃卡片底色得以保留 */
+:root[data-theme="light"] article.post-content pre,
+:root[data-theme="light"] article.post-content pre span {
+  color: var(--shiki-light, var(--tw-prose-pre-code));
+  font-style: var(--shiki-light-font-style, inherit);
+  font-weight: var(--shiki-light-font-weight, inherit);
+  text-decoration: var(--shiki-light-text-decoration, inherit);
+}
+
+:root[data-theme="dark"] article.post-content pre,
+:root[data-theme="dark"] article.post-content pre span {
+  color: var(--shiki-dark, var(--tw-prose-pre-code));
+  font-style: var(--shiki-dark-font-style, inherit);
+  font-weight: var(--shiki-dark-font-weight, inherit);
+  text-decoration: var(--shiki-dark-text-decoration, inherit);
+}
+
 /* 正文代码块：长行改为块内横向滚动，避免字号加大、正文加宽后撑破卡片 */
 article.post-content pre {
   overflow-x: auto;
+}
+
+/* 复制按钮：外套一层定位容器，按钮就不会跟着代码一起横向滚动 */
+.code-shell {
+  position: relative;
+}
+
+.code-copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-tech-border);
+  background: var(--color-tech-card);
+  backdrop-filter: blur(6px);
+  color: var(--code-copy-color);
+  cursor: pointer;
+  /* 默认半透明常显：完全依赖 hover 才出现会让按钮难以被发现，
+     触摸设备上更是永远看不到 */
+  opacity: 0.55;
+  transition:
+    opacity 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.code-shell:hover .code-copy,
+.code-copy:focus-visible,
+.code-copy.is-copied {
+  opacity: 1;
+}
+
+.code-copy:hover,
+.code-copy:focus-visible {
+  color: var(--color-tech-glow);
+  border-color: var(--color-tech-glow);
+}
+
+.code-copy.is-copied {
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.6);
+}
+
+/* 主题切换按钮：两个图标叠在按钮同一格里交叉淡入淡出，
+   比直接 display 切换多一层旋转+缩放的过渡。
+   纯 CSS 控制，切主题时组件不需要重新渲染，也不会出现 hydration 前后跳变 */
+.theme-toggle .theme-icon {
+  grid-area: 1 / 1;
+  transition:
+    opacity 0.3s ease,
+    transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+/* 亮色下显示月亮（点它切暗色），暗色下显示太阳 */
+.theme-toggle .icon-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle .icon-sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.4);
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-moon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.4);
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 /* 尊重系统「减少动态效果」偏好：闪烁、弹跳等装饰动效收敛为静态，

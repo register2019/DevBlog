@@ -8,7 +8,7 @@ export default function Hero() {
         <h1 className="text-[clamp(2rem,5vw,3.2rem)] font-bold mb-4">
           Hi, I&apos;m <span className="text-tech-glow text-glow">Frontend Dev</span>
         </h1>
-        <p className="text-gray-300 text-base md:text-lg mb-6">
+        <p className="text-tech-soft text-base md:text-lg mb-6">
           专注前端可视化、工程化、WebGL / Canvas 开发 | 记录技术踩坑与思考
         </p>
         <div className="flex gap-4 justify-center flex-wrap">

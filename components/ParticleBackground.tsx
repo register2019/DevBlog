@@ -10,6 +10,31 @@ interface Particle {
   vy: number;
 }
 
+interface Palette {
+  /** 粒子圆点颜色 */
+  dot: string;
+  /** 连线颜色，alpha 随距离衰减 */
+  line: (alpha: number) => string;
+  /** 连线最大透明度：亮色下需要更高一点才看得出来 */
+  lineAlpha: number;
+}
+
+/** 粒子配色跟随主题：暗色用亮青，亮色换成压深后的青，避免浅底上看不清 */
+function readPalette(): Palette {
+  if (document.documentElement.dataset.theme === "light") {
+    return {
+      dot: "rgba(2,132,199,0.55)",
+      line: (alpha) => `rgba(2,132,199,${alpha})`,
+      lineAlpha: 0.3,
+    };
+  }
+  return {
+    dot: "rgba(0,210,255,0.6)",
+    line: (alpha) => `rgba(0,210,255,${alpha})`,
+    lineAlpha: 0.2,
+  };
+}
+
 export default function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -26,6 +51,8 @@ export default function ParticleBackground() {
     const particleCount = 80;
     // 系统开启「减少动态效果」时只渲染静态一帧，不进入动画循环
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // 配色可变：切换主题时重新读取，动画模式下下一帧自然生效
+    let palette = readPalette();
 
     const resizeCanvas = () => {
       w = canvas.width = window.innerWidth;
@@ -55,7 +82,7 @@ export default function ParticleBackground() {
       draw() {
         ctx!.beginPath();
         ctx!.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-        ctx!.fillStyle = "rgba(0,210,255,0.6)";
+        ctx!.fillStyle = palette.dot;
         ctx!.fill();
       }
     }
@@ -72,7 +99,7 @@ export default function ParticleBackground() {
             ctx!.beginPath();
             ctx!.moveTo(particles[i].x, particles[i].y);
             ctx!.lineTo(particles[j].x, particles[j].y);
-            ctx!.strokeStyle = `rgba(0,210,255,${0.2 - dist / 600})`;
+            ctx!.strokeStyle = palette.line(palette.lineAlpha * (1 - dist / 120));
             ctx!.lineWidth = 0.5;
             ctx!.stroke();
           }
@@ -104,6 +131,16 @@ export default function ParticleBackground() {
     };
     window.addEventListener("resize", handleResize);
 
+    // 切换主题后换配色。动画模式下下一帧就会用新配色，静态模式需手动补画
+    const observer = new MutationObserver(() => {
+      palette = readPalette();
+      if (reduceMotion) drawFrame();
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+
     if (reduceMotion) {
       drawFrame();
     } else {
@@ -113,6 +150,7 @@ export default function ParticleBackground() {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", handleResize);
+      observer.disconnect();
     };
   }, []);
 

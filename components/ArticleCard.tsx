@@ -18,7 +18,7 @@ export default function ArticleCard({ post }: { post: PostMeta }) {
           {post.title}
         </Link>
       </h3>
-      <p className="text-gray-400 text-sm">{post.excerpt}</p>
+      <p className="text-tech-muted text-sm">{post.excerpt}</p>
       <div className="mt-4 flex flex-wrap gap-2">
         {post.tags.map((tag, index) => (
           <span

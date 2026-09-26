@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 
 /* 带 / 前缀才能在文章页等非首页路由下跳回首页对应区块 */
 const navItems = [
@@ -20,8 +21,8 @@ export default function Header() {
         <Link href="/" className="text-xl font-bold text-tech-glow text-glow">
           DevBlog<span className="text-tech-accent">.</span>
         </Link>
-        {/* 桌面端导航 */}
-        <div className="hidden md:flex gap-8">
+        {/* 桌面端导航 + 主题切换 */}
+        <div className="hidden md:flex items-center gap-8">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -31,16 +32,20 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
+          <ThemeToggle />
         </div>
-        {/* 移动端汉堡按钮 */}
-        <button
-          className="md:hidden text-xl"
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "关闭菜单" : "打开菜单"}
-          aria-expanded={open}
-        >
-          <i className={`fa ${open ? "fa-times" : "fa-bars"}`} />
-        </button>
+        {/* 移动端：主题切换常驻顶栏，汉堡按钮控制菜单 */}
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
+          <button
+            className="text-xl"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "关闭菜单" : "打开菜单"}
+            aria-expanded={open}
+          >
+            <i className={`fa ${open ? "fa-times" : "fa-bars"}`} />
+          </button>
+        </div>
       </nav>
       {/* 移动端下拉菜单 */}
       {open && (

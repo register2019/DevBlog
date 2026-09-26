@@ -48,7 +48,7 @@ export default function PostArchive({ posts }: { posts: PostMeta[] }) {
               className={`px-3 py-1.5 rounded-full border text-xs transition-colors ${
                 active
                   ? "border-tech-glow text-tech-glow bg-tech-glow/10"
-                  : "border-tech-border text-gray-400 hover:border-tech-glow hover:text-tech-glow"
+                  : "border-tech-border text-tech-muted hover:border-tech-glow hover:text-tech-glow"
               }`}
             >
               {item === ALL ? `${ALL} ${posts.length}` : `${item} ${counts.get(item) ?? 0}`}
@@ -73,7 +73,7 @@ export default function PostArchive({ posts }: { posts: PostMeta[] }) {
                       {post.category}
                     </span>
                   </div>
-                  <p className="text-gray-400 text-sm mt-1 line-clamp-2">{post.excerpt}</p>
+                  <p className="text-tech-muted text-sm mt-1 line-clamp-2">{post.excerpt}</p>
                 </div>
               </div>
             </Link>

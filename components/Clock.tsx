@@ -42,7 +42,7 @@ export default function Clock() {
             cy="100"
             r={r}
             fill="none"
-            stroke="rgba(0,210,255,0.12)"
+            stroke="var(--color-tech-border)"
             strokeWidth="6"
           />
           <circle
@@ -50,23 +50,23 @@ export default function Clock() {
             cy="100"
             r={r}
             fill="none"
-            stroke="#00d2ff"
+            stroke="var(--color-tech-glow)"
             strokeWidth="6"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            className="drop-shadow-[0_0_6px_rgba(0,210,255,0.8)]"
+            className="drop-shadow-[0_0_6px_var(--tech-glow-strong)]"
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-tech-dark/40 rounded-full">
           <span className="text-lg font-bold text-tech-glow text-glow tabular-nums">{seconds}</span>
-          <span className="text-[8px] text-gray-400 uppercase tracking-widest">sec</span>
+          <span className="text-[8px] text-tech-muted uppercase tracking-widest">sec</span>
         </div>
       </div>
 
       {/* 时分 */}
       <div className="text-right">
-        <div className="text-2xl md:text-4xl font-bold text-gray-50 tabular-nums leading-none [text-shadow:0_0_8px_rgba(0,210,255,0.5)]">
+        <div className="text-2xl md:text-4xl font-bold text-tech-bright tabular-nums leading-none [text-shadow:0_0_8px_var(--tech-glow-strong)]">
           {hours}
           <span className="animate-pulse">:</span>
           {minutes}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import CodeCopy from "@/components/CodeCopy";
 import { getAllPosts, getPostBySlug, renderMarkdown } from "@/lib/posts";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -32,7 +33,10 @@ export default async function PostPage({ params }: PageProps) {
 
   return (
     <div className="py-16 px-6 lg:px-0 max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto">
-      <Link href="/posts" className="text-sm text-gray-400 hover:text-tech-glow transition-colors">
+      <Link
+        href="/posts"
+        className="text-sm text-tech-muted hover:text-tech-glow transition-colors"
+      >
         <i className="fa fa-arrow-left mr-2" aria-hidden="true" />
         返回文章列表
       </Link>
@@ -61,6 +65,8 @@ export default async function PostPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </div>
+
+      <CodeCopy />
     </div>
   );
 }
