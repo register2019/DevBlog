@@ -24,13 +24,14 @@ export default function ParticleBackground() {
     let raf = 0;
     const particles: P[] = [];
     const particleCount = 80;
+    // 系统开启「减少动态效果」时只渲染静态一帧，不进入动画循环
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const resizeCanvas = () => {
       w = canvas.width = window.innerWidth;
       h = canvas.height = window.innerHeight;
     };
     resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
 
     class P implements Particle {
       x: number;
@@ -79,6 +80,13 @@ export default function ParticleBackground() {
       }
     };
 
+    /** 静态一帧：粒子只画不移动，供「减少动态效果」偏好使用 */
+    const drawFrame = () => {
+      ctx!.clearRect(0, 0, w, h);
+      particles.forEach((p) => p.draw());
+      drawLines();
+    };
+
     const animate = () => {
       ctx!.clearRect(0, 0, w, h);
       particles.forEach((p) => {
@@ -89,11 +97,22 @@ export default function ParticleBackground() {
       raf = requestAnimationFrame(animate);
     };
 
-    animate();
+    // 窗口尺寸变化后同步画布；静态模式下需要补画一帧，否则内容会残留错位
+    const handleResize = () => {
+      resizeCanvas();
+      if (reduceMotion) drawFrame();
+    };
+    window.addEventListener("resize", handleResize);
+
+    if (reduceMotion) {
+      drawFrame();
+    } else {
+      animate();
+    }
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 

@@ -75,3 +75,16 @@ article.post-content {
   --tw-prose-th-borders: rgba(0, 210, 255, 0.25);
   --tw-prose-td-borders: rgba(0, 210, 255, 0.15);
 }
+
+/* 尊重系统「减少动态效果」偏好：闪烁、弹跳等装饰动效收敛为静态，
+   页内锚点跳转改为瞬时，避免给前庭不适用户带来持续动画干扰 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

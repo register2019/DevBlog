@@ -29,9 +29,10 @@ export default function Clock() {
   const offset = circumference * (1 - secondDecimal);
 
   return (
+    // 移动端整体隐藏，md 以上才显示
     <div
       suppressHydrationWarning
-      className="fixed top-16 right-3 z-40 flex items-center gap-3 select-none md:top-5 md:right-5 md:gap-4"
+      className="fixed top-16 right-3 z-40 hidden items-center gap-3 select-none md:flex md:top-5 md:right-5 md:gap-4"
     >
       {/* 环形秒针（移动端隐藏，仅保留紧凑时分） */}
       <div className="hidden md:block relative w-24 h-24">
